@@ -1,6 +1,6 @@
 ---
 - name: Update and Reboot RHEL 9 Server
-  hosts: localhost
+  hosts: all
   become: true
 
   tasks:
