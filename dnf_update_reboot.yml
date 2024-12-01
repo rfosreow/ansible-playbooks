@@ -1,0 +1,32 @@
+---
+- name: Update and Reboot RHEL 9 Server
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Ensure the system is up-to-date
+      yum:
+        name: "*"
+        state: latest
+        update_cache: yes
+
+    - name: Check if a reboot is required
+      command: needs-restarting
+      register: reboot_check
+      ignore_errors: true
+
+    - name: Reboot if needed
+      reboot:
+        reboot_timeout: 600
+      when: reboot_check.rc == 1
+      notify:
+        - Wait for system to come back up
+
+  handlers:
+    - name: Wait for system to come back up
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        state: started
+        delay: 10
+        timeout: 600
